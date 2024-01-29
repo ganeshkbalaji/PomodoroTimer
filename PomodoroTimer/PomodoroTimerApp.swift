@@ -10,7 +10,9 @@ import SwiftData
 
 @main
 struct PomodoroTimerApp: App {
-    var sharedModelContainer: ModelContainer = {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+    static var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
         ])
@@ -24,9 +26,46 @@ struct PomodoroTimerApp: App {
     }()
 
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        // No WindowGroup needed for a menu bar app
+        Settings {
+            // Settings content
         }
-        .modelContainer(sharedModelContainer)
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var statusBarItem: NSStatusItem!
+    var popover: NSPopover!
+    
+    var modelContainer: ModelContainer {
+        PomodoroTimerApp.sharedModelContainer
+    }
+    
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Initialize the status bar item
+        statusBarItem = NSStatusBar.system.statusItem(withLength: 24)
+        let modelContainer = PomodoroTimerApp.sharedModelContainer
+
+
+        if let button = statusBarItem.button {
+            button.image = NSImage(named: "tomato") // Use the name of your image asset here
+            button.action = #selector(togglePopover(_:))
+        }
+
+        // Initialize the popover
+        popover = NSPopover()
+        popover.contentSize = NSSize(width: 200, height: 200)
+        popover.behavior = .transient
+        popover.contentViewController = NSHostingController(rootView: ContentView(modelContainer: modelContainer))
+    }
+
+    @objc func togglePopover(_ sender: AnyObject?) {
+        if let button = statusBarItem.button {
+            if popover.isShown {
+                popover.performClose(sender)
+            } else {
+                popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+            }
+        }
     }
 }
