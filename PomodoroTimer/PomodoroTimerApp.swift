@@ -13,19 +13,6 @@ import UserNotifications
 struct PomodoroTimerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
-    static var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
     var body: some Scene {
         // No WindowGroup needed for a menu bar app
         Settings {
@@ -41,16 +28,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var timerMenuItem: NSMenuItem?
     var endTime: Date?
     
-    var modelContainer: ModelContainer {
-        PomodoroTimerApp.sharedModelContainer
-    }
-    
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize the status bar item
+
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-
-        let modelContainer = PomodoroTimerApp.sharedModelContainer
-
 
         if let button = statusBarItem.button {
             button.image = NSImage(named: "tomato") // Use the name of your image asset here
@@ -62,7 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover = NSPopover()
         popover.contentSize = NSSize(width: 200, height: 200)
         popover.behavior = .transient
-        popover.contentViewController = NSHostingController(rootView: ContentView(modelContainer: modelContainer))
+        popover.contentViewController = NSHostingController(rootView: ContentView()) // Modified ContentView
     }
     
     @objc func statusBarButtonClicked(_ sender: AnyObject?) {
