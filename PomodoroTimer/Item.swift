@@ -6,13 +6,9 @@
 //
 
 import Foundation
-import SwiftData
+import CoreData
 
-@Model
-final class Item {
-    var timestamp: Date
-    
-    init(timestamp: Date) {
-        self.timestamp = timestamp
-    }
+@objc(Item)
+public class Item: NSManagedObject {
+    @NSManaged public var timestamp: Date
 }
