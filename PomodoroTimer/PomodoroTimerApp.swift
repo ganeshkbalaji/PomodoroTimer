@@ -118,47 +118,42 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func updateTimerDisplay() {
-        DispatchQueue.main.async { // Ensure UI updates are on the main thread
-            print("Timer display update tick") // Added logging
-            guard let endTime = self.endTime else {
-                print("Timer ended or endTime not set") // Added logging
-                self.timerDidEnd()
-                return
-            }
+           DispatchQueue.main.async { // Ensure UI updates are on the main thread
+               guard let endTime = self.endTime else {
+                   self.timerDidEnd()
+                   return
+               }
 
-            let remainingTime = endTime.timeIntervalSinceNow
-            if remainingTime <= 0 {
-                self.timerDidEnd()
-            } else {
-                let remainingMinutes = Int(remainingTime) / 60
-                let remainingSeconds = Int(remainingTime) % 60
-                let timerTitle = String(format: "Timer: %02d:%02d", remainingMinutes, remainingSeconds)
-                
-                // Check if the timerMenuItem exists, if not create it and add to menu
-                if self.timerMenuItem == nil {
-                    self.timerMenuItem = NSMenuItem(title: timerTitle, action: nil, keyEquivalent: "")
-                    self.statusBarItem.menu?.insertItem(self.timerMenuItem!, at: 0)
-                } else {
-                    self.timerMenuItem?.title = timerTitle
-                }
-                
-                // This ensures that the menu item is part of the menu
-                if self.timerMenuItem?.menu == nil {
-                    self.statusBarItem.menu?.insertItem(self.timerMenuItem!, at: 0)
-                }
-            }
-        }
-    }
-    
-    @objc func timerDidEnd() {
-        // Invalidate the timer
-        timer?.invalidate()
-        timer = nil
-        endTime = nil
-        
-        // Update the menu item to indicate the timer has ended
-        timerMenuItem?.title = "Timer ended"
-    }
+               let remainingTime = endTime.timeIntervalSinceNow
+               if remainingTime <= 0 {
+                   self.timerDidEnd()
+               } else {
+                   let remainingMinutes = Int(remainingTime) / 60
+                   let remainingSeconds = Int(remainingTime) % 60
+                   let timerTitle = String(format: "%02d:%02d", remainingMinutes, remainingSeconds)
+
+                   // Update the button title to show the remaining time
+                   if let button = self.statusBarItem.button {
+                       button.title = timerTitle
+                   }
+               }
+           }
+       }
+
+    func timerDidEnd() {
+          // Invalidate the timer
+          timer?.invalidate()
+          timer = nil
+          endTime = nil
+          
+          // Update the button to indicate the timer has ended
+          if let button = self.statusBarItem.button {
+              button.title = ""
+          }
+
+          // Schedule a notification if needed
+          scheduleNotification(in: 0)
+      }
 
     func updateTimerMenuItem(minutes: Int) {
         DispatchQueue.main.async { // Ensure UI updates are on the main thread
