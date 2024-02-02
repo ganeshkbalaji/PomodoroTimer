@@ -141,19 +141,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
        }
 
     func timerDidEnd() {
-          // Invalidate the timer
-          timer?.invalidate()
-          timer = nil
-          endTime = nil
-          
-          // Update the button to indicate the timer has ended
-          if let button = self.statusBarItem.button {
-              button.title = ""
-          }
+        // Invalidate the timer
+        timer?.invalidate()
+        timer = nil
+        endTime = nil
+        
+        // Update the button to indicate the timer has ended
+        if let button = self.statusBarItem.button {
+            button.title = ""
+        }
 
-          // Schedule a notification if needed
-          scheduleNotification(in: 0)
-      }
+        // Schedule a notification for break time
+        scheduleNotification(in: 0, title: "Pomodoro Timer", body: "Time's up! Take a 5-minute break.")
+
+        // Start a 5-minute break timer
+        startBreakTimer()
+    }
 
     func updateTimerMenuItem(minutes: Int) {
         DispatchQueue.main.async { // Ensure UI updates are on the main thread
@@ -170,15 +173,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func scheduleNotification(in timeInterval: TimeInterval) {
+    func scheduleNotification(in timeInterval: TimeInterval, title: String, body: String) {
         // Request authorization
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { (granted, error) in
             // Check if permission is granted
             if granted {
                 // Create the content for the notification
                 let content = UNMutableNotificationContent()
-                content.title = "Pomodoro Timer"
-                content.body = "Time's up!"
+                content.title = title
+                content.body = body
                 content.sound = UNNotificationSound.default
 
                 // Create a trigger for the notification
@@ -199,6 +202,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 print("Permission not granted")
             }
         }
+    }
+    
+    func startBreakTimer() {
+        // Start a 5-minute timer for the break
+        startTimer(minutes: 5)
     }
 
 }
