@@ -117,49 +117,54 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     
     @objc func openSettings() {
-        // You would present a settings interface to the user here. For simplicity, we'll just use a dialog to set the timer.
         let alert = NSAlert()
         alert.messageText = "Set Timer"
         alert.informativeText = "Select the number of minutes and seconds:"
         
         let minutesLabel = NSTextField(labelWithString: "Minutes:")
-        minutesLabel.frame = NSRect(x: 0, y: 40, width: 200, height: 24)
-
-        let minutesDropdown = NSPopUpButton(frame: NSRect(x: 0, y: 30, width: 200, height: 24))
+        let minutesDropdown = NSPopUpButton()
         minutesDropdown.addItems(withTitles: ["0", "1", "2", "3", "4", "5", "10", "15", "20", "25"])
-
+        
         let secondsLabel = NSTextField(labelWithString: "Seconds:")
-        secondsLabel.frame = NSRect(x: 0, y: 0, width: 200, height: 24)
-
-        let secondsDropdown = NSPopUpButton(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+        let secondsDropdown = NSPopUpButton()
         secondsDropdown.addItems(withTitles: ["0", "15", "30", "45", "60"])
 
-        let stackView = NSStackView(frame: NSRect(x: 0, y: 0, width: 200, height: 124))
-        stackView.orientation = .vertical        
-        stackView.addView(minutesLabel, in: .top)
-        stackView.addView(minutesDropdown, in: .top)
-        stackView.addView(secondsLabel, in: .bottom)
-        stackView.addView(secondsDropdown, in: .bottom)
+        // Create horizontal stack views
+        let minutesStackView = NSStackView()
+        minutesStackView.orientation = .horizontal
+        minutesStackView.addView(minutesLabel, in: .leading)
+        minutesStackView.addView(minutesDropdown, in: .trailing)
 
-        alert.accessoryView = stackView
+        let secondsStackView = NSStackView()
+        secondsStackView.orientation = .horizontal
+        secondsStackView.addView(secondsLabel, in: .leading)
+        secondsStackView.addView(secondsDropdown, in: .trailing)
+
+        // Create vertical stack view to hold both horizontal stacks
+        let verticalStackView = NSStackView(frame: NSRect(x: 0, y: 0, width: 400, height: 100))
+        verticalStackView.orientation = .vertical
+        verticalStackView.addView(minutesStackView, in: .top)
+        verticalStackView.addView(secondsStackView, in: .bottom)
+
+        alert.accessoryView = verticalStackView
         alert.addButton(withTitle: "OK")
         alert.addButton(withTitle: "Cancel")
-        
+
         let response = alert.runModal()
         
         if response == .alertFirstButtonReturn {
             // Get the selected values
-           let selectedMinutes = minutesDropdown.indexOfSelectedItem
-           let selectedSeconds = secondsDropdown.indexOfSelectedItem * 15
+            let selectedMinutes = minutesDropdown.indexOfSelectedItem
+            let selectedSeconds = secondsDropdown.indexOfSelectedItem * 15
 
-           // Calculate total time in seconds
-           let totalTimeInSeconds = selectedMinutes * 60 + selectedSeconds
+            // Calculate total time in seconds
+            let totalTimeInSeconds = selectedMinutes * 60 + selectedSeconds
 
-           // Save to UserDefaults
-           UserDefaults.standard.set(totalTimeInSeconds, forKey: "focusSessionDuration")
+            // Save to UserDefaults
+            UserDefaults.standard.set(totalTimeInSeconds, forKey: "focusSessionDuration")
 
-           // Start the timer
-           self.startTimer(seconds: totalTimeInSeconds)
+            // Start the timer
+            self.startTimer(seconds: totalTimeInSeconds)
         }
     }
     
