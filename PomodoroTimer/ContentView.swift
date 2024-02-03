@@ -9,13 +9,21 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    // Define your state and logic here, possibly using UserDefaults for simple data storage
-
     var body: some View {
-        // Your view content
         VStack {
-                Text("Pomodoro Timer")
-            // Add more views here as needed
+            Text("Pomodoro Timer")
+            // Your content
+        }
+        .frame(minWidth: 300, minHeight: 200)
+        .toolbar {
+            // This ToolbarItemGroup will appear on the trailing edge of the window
+            ToolbarItemGroup(placement: .automatic) {
+                Button(action: {
+                    // Your action here
+                }) {
+                    Image(systemName: "plus")
+                }
+            }
         }
     }
 }

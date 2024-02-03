@@ -17,6 +17,7 @@ struct PomodoroTimerApp: App {
         // No WindowGroup needed for a menu bar app
         Settings {
             // Settings content
+            SettingsView()
         }
     }
 }
@@ -27,6 +28,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var timer: Timer?
     var timerMenuItem: NSMenuItem?
     var endTime: Date?
+    var isBreakTime = false
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize the status bar item
@@ -147,14 +149,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         if response == .alertFirstButtonReturn {
             // Get the selected values
-            let selectedMinutes = minutesDropdown.indexOfSelectedItem
-            let selectedSeconds = secondsDropdown.indexOfSelectedItem * 15  // because the smallest increment is 15 seconds
-            
-            // Calculate total time in seconds
-            let totalTimeInSeconds = selectedMinutes * 60 + selectedSeconds
-            
-            // Start the timer
-            self.startTimer(seconds: totalTimeInSeconds)
+           let selectedMinutes = minutesDropdown.indexOfSelectedItem
+           let selectedSeconds = secondsDropdown.indexOfSelectedItem * 15
+
+           // Calculate total time in seconds
+           let totalTimeInSeconds = selectedMinutes * 60 + selectedSeconds
+
+           // Save to UserDefaults
+           UserDefaults.standard.set(totalTimeInSeconds, forKey: "focusSessionDuration")
+
+           // Start the timer
+           self.startTimer(seconds: totalTimeInSeconds)
         }
     }
     
@@ -200,7 +205,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
-
+    
     func timerDidEnd() {
         // Invalidate the timer
         timer?.invalidate()
@@ -212,11 +217,77 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.title = ""
         }
 
+        // Determine if the ending timer was for a focus session or a break
+        if isBreakTime {
+            // If it was a break, prompt the user to start a new focus session
+            promptForNewFocusSession()
+        } else {
+            // If it was a focus session, start the break timer
+            startBreakTimer()
+        }
+    }
+    
+    func promptForNewFocusSession() {
+        // Schedule a notification with an action button to start a new focus session
+        let content = UNMutableNotificationContent()
+        content.title = "Focus Session Ended"
+        content.body = "Would you like to start a new focus session?"
+        content.sound = UNNotificationSound.default
+        
+        // Add a 'Start Session' action to the notification
+        let startAction = UNNotificationAction(identifier: "START_SESSION_ACTION",
+                                               title: "Start New Session",
+                                               options: .foreground)
+        let category = UNNotificationCategory(identifier: "START_SESSION_CATEGORY",
+                                              actions: [startAction],
+                                              intentIdentifiers: [],
+                                              hiddenPreviewsBodyPlaceholder: "",
+                                              options: .customDismissAction)
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+        content.categoryIdentifier = "START_SESSION_CATEGORY"
+        
+        // Schedule the notification for immediate display
+        let request = UNNotificationRequest(identifier: UUID().uuidString,
+                                            content: content,
+                                            trigger: nil) // nil trigger means deliver immediately
+        UNUserNotificationCenter.current().add(request) { (error) in
+            if let error = error {
+                // Handle any errors
+                print("Error scheduling prompt for new session: \(error)")
+            }
+        }
+    }
+    
+    func startNewFocusSession() {
+        // Fetch the timer settings from UserDefaults
+        let minutes = UserDefaults.standard.integer(forKey: "pomodoroMinutes")
+        let seconds = UserDefaults.standard.integer(forKey: "pomodoroSeconds")
+
+        // Check if values exist, if not, set a default value
+        let totalTimeInSeconds = (minutes > 0 || seconds > 0) ? (minutes * 60 + seconds) : (25 * 60)  // Default to 25 minutes
+
+        // Start the timer
+        self.startTimer(seconds: totalTimeInSeconds)
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.actionIdentifier == "START_SESSION_ACTION" {
+            startNewFocusSession()
+        }
+        completionHandler()
+    }
+
+    func startBreakTimer() {
         // Schedule a notification for break time
         scheduleNotification(in: 0, title: "Pomodoro Timer", body: "Time's up! Take a 5-minute break.")
 
-        // Start a 5-minute break timer
-        startBreakTimer()
+        // Set a flag indicating it's break time
+        isBreakTime = true
+
+        // Start a 5-minute break timer (300 seconds)
+        startTimer(seconds: 300)
     }
 
     func updateTimerMenuItem(seconds: Int) {
@@ -271,11 +342,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 print("Permission not granted")
             }
         }
-    }
-    
-    func startBreakTimer() {
-        // Start a 5-minute timer for the break (300 seconds)
-        startTimer(seconds: 300)
     }
 
 }
