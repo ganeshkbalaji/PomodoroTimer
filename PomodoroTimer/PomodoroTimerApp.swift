@@ -36,7 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusBarItem.button {
-            button.image = NSImage(named: "tomato") // Use the name of your image asset here
+            button.image = NSImage(named: "tomato_black") // Use the name of your image asset here
             button.target = self
             button.action = #selector(statusBarButtonClicked(_:))
         }
