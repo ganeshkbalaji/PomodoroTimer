@@ -180,8 +180,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             self.timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.updateTimerDisplay), userInfo: nil, repeats: true)
             print("Timer started for \(seconds) seconds") // Corrected logging
-               }
-           }
+       }
+    }
     
     @objc func updateTimerDisplay() {
         DispatchQueue.main.async { // Ensure UI updates are on the main thread
@@ -216,14 +216,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let button = self.statusBarItem.button {
             button.title = ""
         }
+        
+        // Retrieve the focus session duration from UserDefaults
+        let focusSessionDuration = UserDefaults.standard.integer(forKey: "focusSessionDuration")
 
         // Determine if the ending timer was for a focus session or a break
         if isBreakTime {
             // If it was a break, prompt the user to start a new focus session
             promptForNewFocusSession()
         } else {
-            // If it was a focus session, start the break timer
-            startBreakTimer()
+            // Check if the focus session was longer than 10 minutes
+           if focusSessionDuration >= 600 {
+               // If it was a focus session longer than 10 minutes, start the break timer
+               startBreakTimer()
+           } else {
+               // If the focus session was shorter than 10 minutes, directly prompt for a new session
+               promptForNewFocusSession()
+           }
         }
     }
     
