@@ -99,73 +99,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func constructMenu() -> NSMenu {
-            let menu = NSMenu()
+        let menu = NSMenu()
 
-            // Add Pomodoro Timer Item
-            menu.addItem(NSMenuItem(title: "Pomodoro Timer", action: nil, keyEquivalent: ""))
+        // Add Pomodoro Timer Item
+        menu.addItem(NSMenuItem(title: "Pomodoro Timer", action: nil, keyEquivalent: ""))
 
-            // Add a separator
-            menu.addItem(NSMenuItem.separator())
+        // Add a separator
+        menu.addItem(NSMenuItem.separator())
 
-            // Add Settings Item
-            menu.addItem(NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ","))
+        // Add Settings Item
+        let settingsItem = NSMenuItem(title: "Settings", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
 
-            // Add Quit Item
-            menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        // Add Quit Item
+        menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
-            return menu
-        }
+        return menu
+    }
     
     @objc func openSettings() {
-        let alert = NSAlert()
-        alert.messageText = "Set Timer"
-        alert.informativeText = "Select the number of minutes and seconds:"
-        
-        let minutesLabel = NSTextField(labelWithString: "Minutes:")
-        let minutesDropdown = NSPopUpButton()
-        minutesDropdown.addItems(withTitles: ["0", "1", "2", "3", "4", "5", "10", "15", "20", "25"])
-        
-        let secondsLabel = NSTextField(labelWithString: "Seconds:")
-        let secondsDropdown = NSPopUpButton()
-        secondsDropdown.addItems(withTitles: ["0", "15", "30", "45", "60"])
+        let settingsView = SettingsView()
+        let hostingController = NSHostingController(rootView: settingsView)
 
-        // Create horizontal stack views
-        let minutesStackView = NSStackView()
-        minutesStackView.orientation = .horizontal
-        minutesStackView.addView(minutesLabel, in: .leading)
-        minutesStackView.addView(minutesDropdown, in: .trailing)
+        let settingsWindow = NSWindow(contentViewController: hostingController)
+        settingsWindow.title = "Settings"
+        settingsWindow.setContentSize(NSSize(width: 480, height: 300))
 
-        let secondsStackView = NSStackView()
-        secondsStackView.orientation = .horizontal
-        secondsStackView.addView(secondsLabel, in: .leading)
-        secondsStackView.addView(secondsDropdown, in: .trailing)
-
-        // Create vertical stack view to hold both horizontal stacks
-        let verticalStackView = NSStackView(frame: NSRect(x: 0, y: 0, width: 400, height: 100))
-        verticalStackView.orientation = .vertical
-        verticalStackView.addView(minutesStackView, in: .top)
-        verticalStackView.addView(secondsStackView, in: .bottom)
-
-        alert.accessoryView = verticalStackView
-        alert.addButton(withTitle: "OK")
-        alert.addButton(withTitle: "Cancel")
-
-        let response = alert.runModal()
-        
-        if response == .alertFirstButtonReturn {
-            // Get the selected values
-            let selectedMinutes = minutesDropdown.indexOfSelectedItem
-            let selectedSeconds = secondsDropdown.indexOfSelectedItem * 15
-
-            // Calculate total time in seconds
-            let totalTimeInSeconds = selectedMinutes * 60 + selectedSeconds
-
-            // Save to UserDefaults
-            UserDefaults.standard.set(totalTimeInSeconds, forKey: "focusSessionDuration")
-
-            // Start the timer
-            self.startTimer(seconds: totalTimeInSeconds)
-        }
+        let windowController = NSWindowController(window: settingsWindow)
+        windowController.showWindow(nil)
     }
     
     func startTimer(seconds: Int) {
