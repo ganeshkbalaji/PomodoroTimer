@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F01CDA8C2B74A9A0002DC47A /* TimersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01CDA8B2B74A9A0002DC47A /* TimersViewModel.swift */; };
 		F0BBAA832B6E18D400CC16E1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0BBAA822B6E18D400CC16E1 /* SettingsView.swift */; };
 		F0EE3CF62B678FF8007E13CC /* PomodoroTimerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0EE3CF52B678FF8007E13CC /* PomodoroTimerApp.swift */; };
 		F0EE3CF82B678FF8007E13CC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0EE3CF72B678FF8007E13CC /* ContentView.swift */; };
@@ -36,6 +37,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F01CDA8B2B74A9A0002DC47A /* TimersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimersViewModel.swift; sourceTree = "<group>"; };
 		F0BBAA822B6E18D400CC16E1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F0EE3CF22B678FF8007E13CC /* PomodoroTimer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PomodoroTimer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0EE3CF52B678FF8007E13CC /* PomodoroTimerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroTimerApp.swift; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 		F0EE3CF42B678FF8007E13CC /* PomodoroTimer */ = {
 			isa = PBXGroup;
 			children = (
+				F01CDA8B2B74A9A0002DC47A /* TimersViewModel.swift */,
 				F0BBAA822B6E18D400CC16E1 /* SettingsView.swift */,
 				F0EE3CF52B678FF8007E13CC /* PomodoroTimerApp.swift */,
 				F0EE3CF72B678FF8007E13CC /* ContentView.swift */,
@@ -265,6 +268,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F01CDA8C2B74A9A0002DC47A /* TimersViewModel.swift in Sources */,
 				F0EE3CF82B678FF8007E13CC /* ContentView.swift in Sources */,
 				F0BBAA832B6E18D400CC16E1 /* SettingsView.swift in Sources */,
 				F0EE3CFA2B678FF8007E13CC /* Item.swift in Sources */,

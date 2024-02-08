@@ -11,6 +11,8 @@ import SwiftUI
 struct SettingsView: View {
     @State private var timers: [PomodoroTimer] = [] // This holds your timer data
     @State private var showingTimerConfig = false // To show/hide timer configuration view
+    @EnvironmentObject var appDelegate: AppDelegate
+    @EnvironmentObject var timersViewModel: TimersViewModel
 
     var body: some View {
         NavigationView {
@@ -32,16 +34,16 @@ struct SettingsView: View {
         }
     }
 
-    func addTimer(name: String, duration: Int) {
-        // Logic to add a new timer
-        let newTimer = PomodoroTimer(id: UUID(), name: name, duration: duration)
-        timers.append(newTimer)
-        // Save to persistent storage as needed
-    }
-
     func deleteTimer(at offsets: IndexSet) {
         // Delete the timer from the list and from persistent storage
     }
+    
+    func addTimer(name: String, duration: Int) {
+         let newTimer = PomodoroTimer(id: UUID(), name: name, duration: duration)
+         timers.append(newTimer)
+         // Start the timer in AppDelegate
+         appDelegate.startTimerFromSettings(duration: duration)
+     }
 }
 
 // View for configuring a new timer
@@ -73,22 +75,44 @@ struct TimerConfigView: View {
     }
 }
 
-// Represent a single timer row
+class PomodoroTimer: Identifiable, ObservableObject {
+    var id: UUID
+    var name: String
+    var duration: Int
+    @Published var remainingTime: Int
+
+    init(id: UUID = UUID(), name: String, duration: Int) {
+        self.id = id
+        self.name = name
+        self.duration = duration
+        self.remainingTime = duration
+    }
+
+        // Method to update the remaining time
+        func updateRemainingTime(seconds: Int) {
+            DispatchQueue.main.async {
+                self.remainingTime = seconds
+            }
+        }
+    }
+
 struct TimerRow: View {
-    var timer: PomodoroTimer
+    @ObservedObject var timer: PomodoroTimer
 
     var body: some View {
         HStack {
             Text(timer.name)
             Spacer()
-            Text("\(timer.duration) min")
+            VStack(alignment: .trailing) {
+                Text("Original: \(formatTime(seconds: timer.duration))")
+                Text("Remaining: \(formatTime(seconds: timer.remainingTime))")
+            }
         }
     }
-}
 
-// Model for the Pomodoro Timer
-struct PomodoroTimer: Identifiable {
-    var id: UUID
-    var name: String
-    var duration: Int // duration in minutes
+    func formatTime(seconds: Int) -> String {
+        let minutes = seconds / 60
+        let seconds = seconds % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
 }

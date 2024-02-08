@@ -12,23 +12,24 @@ import UserNotifications
 @main
 struct PomodoroTimerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    var timersViewModel = TimersViewModel()
 
     var body: some Scene {
-        // No WindowGroup needed for a menu bar app
-        Settings {
-            // Settings content
-            SettingsView()
-        }
-    }
+       Settings {
+           SettingsView()
+               .environmentObject(timersViewModel) // Inject the shared view model here
+       }
+   }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     var statusBarItem: NSStatusItem!
     var popover: NSPopover!
     var timer: Timer?
     var timerMenuItem: NSMenuItem?
     var endTime: Date?
     var isBreakTime = false
+    var settingsWindow: NSWindow?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize the status bar item
@@ -97,6 +98,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
+    
+    func startTimerFromSettings(duration: Int) {
+        // Call startTimer with the duration from SettingsView
+        self.startTimer(seconds: duration)
+        // Update the status bar item to reflect the new timer
+        updateStatusBarItemWithTimer(duration: duration)
+    }
+
+    func updateStatusBarItemWithTimer(duration: Int) {
+        // Update the status bar item here
+        // Similar logic as in updateTimerDisplay
+        // ...
+    }
 
     func constructMenu() -> NSMenu {
         let menu = NSMenu()
@@ -119,15 +133,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func openSettings() {
-        let settingsView = SettingsView()
-        let hostingController = NSHostingController(rootView: settingsView)
+        // Check if the settings window already exists
+        if let existingWindow = settingsWindow {
+            // Bring the existing window to the front
+            existingWindow.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        } else {
+            // Create the settings window if it doesn't exist
+            let settingsView = SettingsView().environmentObject(self)
+            let hostingController = NSHostingController(rootView: settingsView)
 
-        let settingsWindow = NSWindow(contentViewController: hostingController)
-        settingsWindow.title = "Settings"
-        settingsWindow.setContentSize(NSSize(width: 480, height: 300))
+            let newSettingsWindow = NSWindow(contentViewController: hostingController)
+            newSettingsWindow.title = "Settings"
+            newSettingsWindow.setContentSize(NSSize(width: 480, height: 300))
 
-        let windowController = NSWindowController(window: settingsWindow)
-        windowController.showWindow(nil)
+            let windowController = NSWindowController(window: newSettingsWindow)
+            windowController.showWindow(nil)
+
+            // Store the reference to the new window
+            settingsWindow = newSettingsWindow
+        }
     }
     
     func startTimer(seconds: Int) {
